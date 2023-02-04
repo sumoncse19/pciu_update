@@ -22,6 +22,9 @@
     "@fortawesome/free-regular-svg-icons": "^6.2.1",
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/vue-fontawesome": "^3.0.3",
+    "@syncfusion/ej2-vue-kanban": "^20.4.48",
+    "firebase": "^9.17.1",
+    "firebase-admin": "^11.5.0",
     "sass": "^1.57.1"
   }
 }

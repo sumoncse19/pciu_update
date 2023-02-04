@@ -28,6 +28,12 @@
                   of PCIU brims with talent, creativity and international
                   connections. PCIU has been doing excellent community services
                   by engaging the students
+                  <button
+                    class="h-10 md:mr-7.2 rounded-full bg-orange-600 px-9 text-base font-bold flex items-center justify-center whitespace-nowrap"
+                    @click="checkButton"
+                  >
+                    check button {{ count }}
+                  </button>
                 </p>
                 <div
                   class="flex flex-col md:flex-row space-y-4 md:space-y-0 justify-center lg:justify-start items-center"
@@ -78,7 +84,15 @@
   </transition>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+const count = ref(0);
+
+// functions that mutate state and trigger updates
+function checkButton() {
+  count.value++;
+}
+</script>
 
 <style lang="scss" scoped>
 iframe {

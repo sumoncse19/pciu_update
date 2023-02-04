@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header />
-    <AuthenticationRegister />
+    <AuthenticationLogin />
   </div>
 </template>
 

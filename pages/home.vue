@@ -1,11 +1,7 @@
 <template>
   <div>
     <h2>Home Page</h2>
-    <p>
-      Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ducimus
-      voluptatibus voluptates modi nihil unde dolorum repellendus ab quasi sit
-      laborum!
-    </p>
+    <DashBoard />
   </div>
 </template>
 
