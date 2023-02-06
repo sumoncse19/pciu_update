@@ -5,7 +5,11 @@
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+definePageMeta({
+  middleware: ["auth"],
+});
+</script>
 
 <style lang="scss" scoped>
 h2 {

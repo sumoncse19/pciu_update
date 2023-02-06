@@ -1,3 +1,8 @@
+// import pkg from "firebase-admin";
+import { getApps, initializeApp, cert } from "firebase-admin/app";
+
+// const { initializeApp, credential } = pkg;
+
 const firebaseServerConfigs = {
   type: "service_account",
   project_id: "pciu-journal",
@@ -12,3 +17,15 @@ const firebaseServerConfigs = {
   client_x509_cert_url:
     "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-7mxhh%40pciu-journal.iam.gserviceaccount.com",
 };
+
+export default function useFirebaseServer() {
+  let app;
+  if (getApps().length === 0)
+    app = initializeApp({
+      credential: cert(firebaseServerConfigs),
+    });
+
+  return {
+    app,
+  };
+}

@@ -89,6 +89,7 @@
             <!-- Email input -->
             <div class="mb-6">
               <input
+                v-model="email"
                 type="text"
                 class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="exampleFormControlInput2"
@@ -99,6 +100,7 @@
             <!-- Password input -->
             <div class="mb-6">
               <input
+                v-model="password"
                 type="password"
                 class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="exampleFormControlInput2"
@@ -124,6 +126,7 @@
 
             <div class="text-center lg:text-left">
               <button
+                @click="loginWithEmail"
                 type="button"
                 class="inline-block px-7 py-3 bg-blue-600 text-white font-medium text-sm leading-snug uppercase rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out"
               >
@@ -145,6 +148,60 @@
   </section>
 </template>
 
-<script setup></script>
+<script setup>
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  setPersistence,
+  inMemoryPersistence,
+  getIdToken,
+} from "firebase/auth";
+
+const email = ref("");
+const password = ref("");
+
+const { auth } = useFirebaseClient();
+
+onMounted(() => {
+  setTimeout(() => {}, 500);
+});
+
+const loginWithEmail = () => {
+  setPersistence(auth, inMemoryPersistence).then(() => {
+    signInWithEmailAndPassword(auth, email.value, password.value).then(
+      (user) => {
+        console.log(user, "user");
+        getIdToken(user.user).then((idToken) => {
+          console.log("user", idToken);
+          fetch("/api/login", {
+            method: "POST",
+            body: JSON.stringify({ idToken }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.error) {
+                console.log(data.error);
+                return;
+              }
+              signOut(auth).then(() => {
+                navigateTo("/home");
+              });
+            });
+
+          // OLD THEN
+          // .then((res) => {
+          //   signOut(auth).then(() => {
+          //     navigateTo("/home");
+          //   });
+          // });
+        });
+      }
+    );
+  });
+};
+</script>
 
 <style lang="scss" scoped></style>

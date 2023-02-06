@@ -4,7 +4,7 @@
       <nav>
         <ul
           class="flex gap-4 text-white transition-all duration-500 ease-in-out"
-          :class="isSticky ? 'w-[350px]' : 'w-[174px]'"
+          :class="isSticky ? 'w-[400px]' : 'w-[210px]'"
         >
           <li>
             <NuxtLink to="/home">Home</NuxtLink>
@@ -20,6 +20,9 @@
           </li>
           <li>
             <NuxtLink to="/signup" class="whitespace-nowrap">Sign Up</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/login" class="whitespace-nowrap">Log In</NuxtLink>
           </li>
         </ul>
       </nav>

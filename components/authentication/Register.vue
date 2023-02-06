@@ -93,7 +93,11 @@
 </template>
 
 <script setup>
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { useRoute } from "vue-router";
 
 const { auth } = useFirebaseClient();
@@ -109,17 +113,37 @@ const { auth } = useFirebaseClient();
 const name = ref("");
 const email = ref("");
 const password = ref("");
+const userInfo = ref({});
 
-const register = () => {
-  console.log("here");
-  createUserWithEmailAndPassword(auth, email.value, password.value)
-    .then((user) => {
-      console.log("Successfully Registered!", user);
-    })
-    .catch((error) => {
-      console.log(error.code);
-      alert(error.message);
+const register = async () => {
+  console.log("here", name.value);
+  const response = await createUserWithEmailAndPassword(
+    auth,
+    email.value,
+    password.value
+  );
+  if (response) {
+    console.log(response, "before displayName");
+    // const User = response;
+    // updateProfile({ user: User });
+    const updateResponse = updateProfile(auth, {
+      displayName: name.value,
     });
+    if (updateResponse) {
+      console.log(updateResponse, "here update");
+    }
+  } else {
+    throw new Error("Unable to register user");
+  }
+  // .then((user) => {
+  //   console.log("Successfully Registered!", user.user);
+  //   user.user.updateProfile({displayName: name})
+  //   console.log("Successfully update!", user);
+  // })
+  // .catch((error) => {
+  //   console.log(error.code);
+  //   alert(error.message);
+  // });
 };
 
 const signInWithGoogle = () => {
