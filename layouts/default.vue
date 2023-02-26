@@ -18,7 +18,6 @@ const isSticky = ref(false);
 const route = useRoute();
 
 onMounted(() => {
-  console.log(route.name);
   isLoggedIn.value = cookies.get("checkLogIn");
   window.addEventListener("scroll", handleScroll);
 });

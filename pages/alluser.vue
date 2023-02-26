@@ -134,7 +134,10 @@
                 {{ user.role }}
               </div>
             </td>
-            <td class="px-6 py-4" @click="updateUser(user.email)">
+            <td
+              class="px-6 py-4"
+              @click="removeUser(user.email), removeUserProgress(user.email)"
+            >
               <button class="font-medium btn text-white">
                 {{ user.isActive === true ? "Remove" : "Approve" }}
               </button>
@@ -152,9 +155,11 @@ import Cookie from "cookie-universal";
 
 const cookies = Cookie();
 const userRole = ref("");
+const userEmail = ref("");
 
 onMounted(() => {
   userRole.value = cookies.get("userRole");
+  userEmail.value = cookies.get("userEmail");
   setTimeout(() => {
     getUser();
   }, 1000);
@@ -166,7 +171,7 @@ const getUser = () => {
   const role = ref("Teacher");
   const isActive = ref(true);
   fetch(
-    `http://localhost:5000/users/${role.value}/${isActive.value}/${userRole.value}`
+    `http://localhost:5000/getSuperVisorStudent/${userEmail.value}/${userRole.value}/${isActive.value}`
   )
     .then((res) => res.json())
     .then((data) => {
@@ -178,7 +183,7 @@ const getUser = () => {
     });
 };
 
-const updateUser = (userEmail) => {
+const removeUser = (userEmail) => {
   fetch(`http://localhost:5000/deleteUser/${userEmail}`, {
     method: "DELETE",
     body: JSON.stringify({
@@ -192,6 +197,26 @@ const updateUser = (userEmail) => {
     .then((data) => {
       if (data) {
         getUser();
+      } else {
+        alert(data.response);
+      }
+    });
+};
+
+const removeUserProgress = (userEmail) => {
+  fetch(`http://localhost:5000/deleteUserProgress/${userEmail}`, {
+    method: "DELETE",
+    body: JSON.stringify({
+      email: userEmail,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data) {
+        alert("Deleted Student Progress Successfully!");
       } else {
         alert(data.response);
       }

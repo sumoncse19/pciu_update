@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <div>This is from home</div>
 </template>
 
 <script setup>
@@ -10,13 +10,13 @@ onMounted(() => {
   const isAccountActive = cookies.get("accountActive");
   const isLoggedIn = cookies.get("checkLogIn");
   const checkUserRole = cookies.get("userRole");
-  if ((!isAccountActive || !isLoggedIn) && checkUserRole !== "Admin") {
-    alert("Your account is not active");
-    navigateTo("/");
-    setTimeout(() => {
-      location.reload();
-    }, 500);
-  }
+  // if ((!isAccountActive || !isLoggedIn) && checkUserRole !== "Admin") {
+  //   alert("Your account is not active");
+  //   navigateTo("/");
+  //   setTimeout(() => {
+  //     location.reload();
+  //   }, 500);
+  // }
 });
 </script>
 

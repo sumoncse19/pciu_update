@@ -23,11 +23,11 @@
     "@fortawesome/free-solid-svg-icons": "^6.2.1",
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "@pinia/nuxt": "^0.4.6",
-    "@syncfusion/ej2-vue-kanban": "^20.4.48",
     "cookie-universal": "^2.2.2",
     "firebase": "^9.17.1",
     "firebase-admin": "^11.5.0",
     "pinia": "^2.0.30",
-    "sass": "^1.57.1"
+    "sass": "^1.57.1",
+    "vue-draggable-next": "^2.1.1"
   }
 }

@@ -24,18 +24,26 @@
         <nav>
           <ul
             class="flex gap-4 text-white transition-all duration-500 ease-in-out"
-            :class="isSticky ? 'w-[400px]' : 'w-[210px]'"
+            :class="
+              isSticky
+                ? 'w-[400px]'
+                : !isLoggedIn && route.name === 'index'
+                ? 'w-[240px]'
+                : route.name !== 'index'
+                ? 'w-[360px]'
+                : 'w-[210px]'
+            "
           >
             <li>
               <NuxtLink to="/home">Home</NuxtLink>
             </li>
             <li><NuxtLink to="/about">About</NuxtLink></li>
-            <li v-if="isSticky">
+            <li v-if="isSticky || route.name !== 'index'">
               <NuxtLink to="/products" class="btn whitespace-nowrap"
                 >All Paper</NuxtLink
               >
             </li>
-            <li v-if="isSticky">
+            <li v-if="isSticky || route.name !== 'index'">
               <NuxtLink to="/products/teacher">Mentor</NuxtLink>
             </li>
             <li v-if="!isLoggedIn">

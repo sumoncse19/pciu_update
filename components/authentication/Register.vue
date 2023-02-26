@@ -14,6 +14,7 @@
           class="block border border-grey-light w-full p-3 rounded mb-4"
           name="fullname"
           placeholder="Full Name"
+          required
         />
 
         <input
@@ -25,52 +26,48 @@
         />
 
         <label for="role">Sign Up As:</label>
-        <select class="form-control" v-model="role">
+        <select
+          class="form-control bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4"
+          v-model="role"
+        >
           <option v-for="role in roles" :value="role.val" :key="role.id">
             {{ role.val }}
           </option>
         </select>
-
-        <input
-          v-model="role"
-          placeholder=","
-          type="text"
-          class="block border border-grey-light w-full p-3 rounded mb-4"
-        />
 
         <label v-if="role === 'Student'" for="superVisorName"
           >Your Supervisor Name:</label
         >
         <select
           v-if="role === 'Student'"
-          class="form-control"
+          class="form-control bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4"
           v-model="superVisorName"
         >
           <option
             v-for="superVisor in superVisors"
-            :value="superVisor.val"
+            :value="superVisor.name"
             :key="superVisor.id"
           >
-            {{ superVisor.val }}
+            {{ superVisor.name }}
           </option>
         </select>
-        <input
-          v-if="role === 'Student'"
-          v-model="superVisorName"
-          type="text"
-          class="block border border-grey-light w-full p-3 rounded mb-4"
-          name="superVisorName"
-          placeholder="Your SuperVisor Name"
-        />
 
-        <input
+        <label v-if="role === 'Student'" for="superVisorName"
+          >Your Supervisor Email:</label
+        >
+        <select
           v-if="role === 'Student'"
+          class="form-control bg-gray-50 border border-gray-300 text-black text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4"
           v-model="superVisorMail"
-          type="email"
-          class="block border border-grey-light w-full p-3 rounded mb-4"
-          name="superVisorMail"
-          placeholder="Your SuperVisor Mail"
-        />
+        >
+          <option
+            v-for="superVisor in superVisors"
+            :value="superVisor.email"
+            :key="superVisor.id"
+          >
+            {{ superVisor.email }}
+          </option>
+        </select>
 
         <input
           v-model="email"
@@ -144,55 +141,101 @@ const roles = ref({
   3: { id: 3, val: "Admin" },
   4: { id: 4, val: "Authority" },
 });
-const superVisors = ref({
-  1: { id: 1, val: "Umma Saima Rahman" },
-  2: { id: 2, val: "Morshad Rana" },
-  3: { id: 3, val: "Taofica Amreen" },
-  4: { id: 4, val: "Sowmitra Das" },
-});
+let superVisors = ref({});
 const role = ref("Student");
 const superVisorName = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
-const superVisorMail = ref("");
+let superVisorMail = ref("");
 
-const user = ref(null);
+const allUsers = ref(null);
+
+onMounted(() => {
+  // Get All User
+  fetch(`http://localhost:5000/users`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (data) {
+        allUsers.value = data;
+        let allTeacher = {};
+        allUsers.value.forEach((user, index) => {
+          if (user.role === "Teacher") {
+            const newAdd = {
+              id: index,
+              name: user.name,
+              email: user.email,
+            };
+            allTeacher[index] = newAdd;
+          }
+        });
+        superVisors.value = allTeacher;
+      } else {
+        alert(data.response);
+      }
+    });
+});
 
 const handleRegister = () => {
-  if (password.value === confirmPassword.value) {
-    fetch("http://localhost:5000/users", {
-      method: "POST",
-      body: JSON.stringify({
-        name: name.value,
-        pciuId: pciuId.value,
-        role: role.value,
-        superVisorMail: superVisorMail.value,
-        email: email.value,
-        password: password.value,
-        isActive: false,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert(data.response);
-        if (data.insertedId) {
-          console.log(data, "here registered data");
-          cookies.set("userInfo", data);
-          cookies.set("accessToken", data.accessToken);
-          cookies.set("userName", data.name);
-          cookies.set("userEmail", data.email);
-          cookies.set("accountActive", data.isActive);
-          cookies.set("userRole", data.role);
-          cookies.set("checkLogIn", data.isLoggedIn);
-          navigateTo("/home");
-        }
-      });
+  let nameId = null;
+  let emailId = null;
+  Object.values(superVisors.value).forEach((user) => {
+    if (user.name === superVisorName.value) {
+      nameId = user.id;
+    }
+  });
+  Object.values(superVisors.value).forEach((user) => {
+    if (user.email === superVisorMail.value) {
+      emailId = user.id;
+    }
+  });
+  if (name.value === "") {
+    alert("Name field is required!");
+    return 0;
+  } else if (pciuId.value.toString().length <= 4) {
+    alert("Enter Correct Id!");
+    return 0;
+  }
+  if (nameId === emailId) {
+    if (password.value === confirmPassword.value) {
+      fetch("http://localhost:5000/users", {
+        method: "POST",
+        body: JSON.stringify({
+          name: name.value,
+          pciuId: pciuId.value,
+          role: role.value,
+          superVisorMail:
+            role.value === "Teacher" ? "role.value" : superVisorMail.value,
+          email: email.value,
+          password: password.value,
+          isActive: false,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          alert(data.response);
+          if (data.insertedId) {
+            cookies.set("userInfo", data);
+            cookies.set("accessToken", data.accessToken);
+            cookies.set("userName", data.name);
+            cookies.set("userEmail", data.email);
+            cookies.set("accountActive", data.isActive);
+            cookies.set("userRole", data.role);
+            cookies.set("checkLogIn", data.isLoggedIn);
+            navigateTo("/home");
+            setTimeout(() => {
+              location.reload();
+            }, 500);
+          }
+        });
+    } else {
+      alert("Your password is not match.");
+    }
   } else {
-    alert("Your password is not match.");
+    alert("Super visor name and email are not match!!!");
   }
 };
 </script>

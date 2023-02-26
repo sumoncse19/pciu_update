@@ -5,7 +5,7 @@
         class="flex items-center justify-between pb-4 bg-white dark:bg-gray-900"
       >
         <div>
-          <button
+          <!-- <button
             id="dropdownActionButton"
             data-dropdown-toggle="dropdownAction"
             class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
@@ -28,9 +28,9 @@
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
-          </button>
+          </button> -->
           <!-- Dropdown menu -->
-          <div
+          <!-- <div
             id="dropdownAction"
             class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
           >
@@ -67,9 +67,9 @@
                 >Delete User</a
               >
             </div>
-          </div>
+          </div> -->
         </div>
-        <label for="table-search" class="sr-only">Search</label>
+        <!-- <label for="table-search" class="sr-only">Search</label>
         <div class="relative">
           <div
             class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
@@ -94,25 +94,13 @@
             class="block p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="Search for users"
           />
-        </div>
+        </div> -->
       </div>
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
         >
           <tr>
-            <th scope="col" class="p-4">
-              <div class="flex items-center">
-                <input
-                  id="checkbox-all-search"
-                  type="checkbox"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label for="checkbox-all-search" class="sr-only"
-                  >checkbox</label
-                >
-              </div>
-            </th>
             <th scope="col" class="px-6 py-3">Name</th>
             <th scope="col" class="px-6 py-3">Position</th>
             <th scope="col" class="px-6 py-3">Status</th>
@@ -123,18 +111,6 @@
           <tr
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
-            <!-- <td class="w-4 p-4">
-              <div class="flex items-center">
-                <input
-                  id="checkbox-table-search-1"
-                  type="checkbox"
-                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label for="checkbox-table-search-1" class="sr-only"
-                  >checkbox</label
-                >
-              </div>
-            </td> -->
             <th
               scope="row"
               class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
@@ -159,12 +135,18 @@
               </div>
             </td>
             <!-- @click="
-                updateUser(user.role, user.isActive, user.email, user._id)
+                approveUser(user.role, user.isActive, user.email, user._id)
               " -->
             <td
               class="px-6 py-4"
               @click="
-                updateUser(user.role, user.isActive, user.email, user._id)
+                approveUser(
+                  user.role,
+                  user.isActive,
+                  user.email,
+                  user._id,
+                  user.name
+                )
               "
             >
               <button class="font-medium btn text-white">
@@ -184,9 +166,11 @@ import Cookie from "cookie-universal";
 
 const cookies = Cookie();
 const userRole = ref("");
+const userEmail = ref("");
 
 onMounted(() => {
   userRole.value = cookies.get("userRole");
+  userEmail.value = cookies.get("userEmail");
   setTimeout(() => {
     getUser();
   }, 1000);
@@ -194,11 +178,28 @@ onMounted(() => {
 
 const newUsers = ref({});
 
+// const getUser = () => {
+//   const role = ref("Teacher");
+//   const isActive = ref(false);
+//   fetch(
+//     `http://localhost:5000/users/${role.value}/${isActive.value}/${userRole.value}`
+//   )
+//     .then((res) => res.json())
+//     .then((data) => {
+//       if (data) {
+//         newUsers.value = data;
+//         console.log(data, "in get user");
+//       } else {
+//         alert(data.response);
+//       }
+//     });
+// };
+
 const getUser = () => {
   const role = ref("Teacher");
   const isActive = ref(false);
   fetch(
-    `http://localhost:5000/users/${role.value}/${isActive.value}/${userRole.value}`
+    `http://localhost:5000/getSuperVisorStudent/${userEmail.value}/${userRole.value}/${isActive.value}`
   )
     .then((res) => res.json())
     .then((data) => {
@@ -211,7 +212,7 @@ const getUser = () => {
     });
 };
 
-const updateUser = (userRole, userIsActive, userEmail, userId) => {
+const approveUser = (userRole, userIsActive, userEmail, userId, userName) => {
   console.log(userEmail, "here mail");
   fetch(
     `http://localhost:5000/users/${userRole}/${userIsActive}/${userEmail}/${userId}`,
@@ -233,6 +234,24 @@ const updateUser = (userRole, userIsActive, userEmail, userId) => {
         getUser();
       } else {
         alert(data.response);
+      }
+    });
+
+  fetch(`http://localhost:5000/usersProgress/${userEmail}`, {
+    method: "POST",
+    body: JSON.stringify({
+      name: userName,
+      email: userEmail,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      alert(data.response);
+      if (data.insertedId) {
+        console.log(data, "here data");
       }
     });
 };
