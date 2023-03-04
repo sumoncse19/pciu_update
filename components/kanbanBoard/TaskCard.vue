@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white shadow rounded px-3 pt-3 pb-5 border border-white">
+  <div class="bg-white shadow rounded px-3 pt-3 pb-5 border border-white card">
     <div class="flex justify-between">
-      <p class="text-gray-700 font-semibold font-sans tracking-wide text-sm">
+      <p class="text-gray-800 font-semibold font-sans tracking-wide text-sm">
         {{ task.title }}
       </p>
 
@@ -42,4 +42,8 @@ const props = defineProps({
 // });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.card {
+  min-width: 200px;
+}
+</style>

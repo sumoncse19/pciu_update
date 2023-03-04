@@ -28,6 +28,7 @@
     "firebase-admin": "^11.5.0",
     "pinia": "^2.0.30",
     "sass": "^1.57.1",
+    "vue-document-editor": "^2.2.2",
     "vue-draggable-next": "^2.1.1"
   }
 }

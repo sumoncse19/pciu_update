@@ -44,15 +44,15 @@
     <!-- Agile Board -->
     <div class="flex justify-center">
       <div
-        class="progressBody flex overflow-y-scroll my-4 border-gray-600 rounded-lg border-2 scroll"
+        class="progressBody flex overflow-y-scroll m-4 border-gray-600 rounded-lg border-2 scroll"
       >
         <div
           v-for="column in columns"
           :key="column.title"
-          class="rounded-lg px-3 py-3 column-width mr-4 min-w-[200px]"
+          class="rounded-lg px-3 py-3 mr-3 column-width min-w-[200px]"
         >
           <p
-            class="text-gray-700 font-semibold font-sans tracking-wide text-sm"
+            class="text-gray-800 font-semibold font-sans tracking-wide text-sm"
           >
             {{ column.title }}
           </p>
@@ -118,7 +118,7 @@
 
     <div
       v-if="showModal || isShowCardDetails"
-      class="bg-gray-500 absolute rounded-lg top-1/2 left-1/2 height-[200px] w-97 p-6 transform -translate-x-1/2 -translate-y-1/2"
+      class="bg-gray-500 absolute rounded-lg border-2 border-gray-800 top-1/2 min-w-[75%] left-1/2 h-[70vh] overflow-y-auto scroll w-97 p-6 transform -translate-x-1/2 -translate-y-1/2"
     >
       <div class="text-center space-y-4">
         <p
@@ -141,6 +141,7 @@
             id="cardTitle"
             type="text"
             placeholder="Card Title"
+            @click="showSaveButton()"
           />
         </div>
 
@@ -151,14 +152,30 @@
           >
             Card Description
           </label>
-          <textarea
-            v-model="cardDescription"
-            rows="10"
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="cardDescription"
-            type="text"
-            placeholder="Card Title"
-          />
+          <div class="relative">
+            <textarea
+              v-model="cardDescription"
+              rows="10"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="cardDescription"
+              type="text"
+              placeholder="Card Title"
+              @click="showSaveButton()"
+            />
+            <button
+              v-if="isShowSaveButton && !showModal"
+              class="btn my-6 absolute right-2 bottom-1"
+              @click="
+                showModal
+                  ? addCard()
+                  : isShowCardDetails
+                  ? updateCardState(true)
+                  : ''
+              "
+            >
+              Save
+            </button>
+          </div>
         </div>
 
         <div>
@@ -202,6 +219,7 @@
         </div>
 
         <button
+          v-if="showModal"
           class="btn my-6"
           @click="
             showModal
@@ -212,6 +230,21 @@
           "
         >
           Save
+        </button>
+        <div v-if="isShowCardDetails">
+          <CommentBox
+            :selectedCardDetails="selectedCardDetails"
+            :columns="selectStudents"
+            :cardState="cardState"
+            :selectName="selectStudent"
+            :selectEmail="selectEmail"
+            @getAllUsersProgressUpdate="getAllUsersProgressUpdate"
+            @showCardDetails="showCardDetails"
+          />
+        </div>
+
+        <button v-if="isShowCardDetails" class="btn my-6" @click="deleteCard()">
+          Delete
         </button>
       </div>
     </div>
@@ -240,6 +273,34 @@ onMounted(() => {
   getActiveUser();
   getAllUsersProgress();
 });
+const getAllUsersProgressUpdate = () => {
+  getAllUsersProgress();
+  setTimeout(() => {
+    const currentOpenTask = ref("");
+    usersProgress.value.forEach((singleUserProg) => {
+      if (
+        singleUserProg.email === selectEmail.value &&
+        singleUserProg.userName === selectStudent.value
+      ) {
+        singleUserProg.userProgress.forEach((singleColumn) => {
+          if (singleColumn.id === currentColumnId.value) {
+            singleColumn.tasks.forEach((singleTask) => {
+              if (singleTask.id === currentTaskId.value) {
+                currentOpenTask.value = singleTask;
+              }
+            });
+          }
+        });
+      }
+    });
+    showCardDetails(
+      currentOpenTask.value,
+      currentTaskId.value,
+      currentColumnId.value,
+      cardState.value
+    );
+  }, 1000);
+};
 const getActiveUser = () => {
   const isActive = ref(true);
   fetch(
@@ -270,6 +331,7 @@ const getActiveUser = () => {
 
 const usersProgress = ref([]);
 const getAllUsersProgress = () => {
+  console.log("from get all user progress");
   fetch(`http://localhost:5000/usersProgress`)
     .then((res) => res.json())
     .then((data) => {
@@ -346,13 +408,15 @@ const cardTitle = ref("");
 const cardDescription = ref("");
 
 const addCard = () => {
-  fetch(`http://localhost:5000/usersProgress/${userEmail.value}`, {
+  console.log("here the add card fronted", cardState.value);
+  fetch(`http://localhost:5000/addNewCard/${userEmail.value}`, {
     method: "PUT",
     body: JSON.stringify({
-      userName: userName.value,
-      email: userEmail.value,
+      userName: selectStudent.name,
+      email: selectStudent.email,
       cardType: cardType.value,
       cardTitle: cardTitle.value,
+      cardState: cardState.value,
       cardDescription: cardDescription.value,
     }),
     headers: {
@@ -363,16 +427,51 @@ const addCard = () => {
     .then((data) => {
       if (data.acknowledged) {
         alert("Card Added Successfully");
-        location.reload();
+        getAllUsersProgress();
+        setTimeout(() => {
+          checkStudentProgress(selectStudent.name, selectStudent.email);
+        }, 500);
+        closeModal();
       }
     });
+};
+
+const deleteCard = () => {
+  if (confirm("Do you want to delete this card!")) {
+    fetch(`http://localhost:5000/deleteSingleCard/${userEmail}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        email: selectStudent.email,
+        id: currentTaskId.value,
+        stateId: currentColumnId.value,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          alert("Deleted Card Successfully!");
+          getAllUsersProgress();
+          closeModal();
+        } else {
+          alert(data.response);
+        }
+      });
+  } else {
+    console.log("Card deletion cancelled");
+  }
 };
 
 const isShowCardDetails = ref(false);
 const currentColumnId = ref(null);
 const currentTaskId = ref(null);
+const selectedCardDetails = ref(null);
 
 const showCardDetails = (openTask, taskId, columnId, title) => {
+  console.log(openTask, "here open task");
+  selectedCardDetails.value = openTask;
   isShowCardDetails.value = true;
   cardTitle.value = openTask.title;
   cardDescription.value = openTask.description;
@@ -380,15 +479,42 @@ const showCardDetails = (openTask, taskId, columnId, title) => {
   currentColumnId.value = columnId;
   currentTaskId.value = taskId;
   cardState.value = title;
+  console.log(
+    "cardState",
+    cardState.value,
+    "selectedCardDetails",
+    selectedCardDetails.value,
+    "isShowCardDetails",
+    isShowCardDetails.value,
+    "cardTitle",
+    cardTitle.value,
+    "cardDescription",
+    cardDescription.value,
+    "cardType",
+    cardType.value,
+    "currentColumnId",
+    currentColumnId.value,
+    "currentTaskId",
+    currentTaskId.value,
+    "cardState",
+    cardState.value,
+    "card open"
+  );
 };
 
 const accessDenied = () => {
   alert("You don't have permission to access this!!");
 };
 
+const isShowSaveButton = ref(false);
+const showSaveButton = () => {
+  isShowSaveButton.value = true;
+};
+
 const updateCardStateCount = ref(0);
 
 const updateCardState = (isModal) => {
+  isShowSaveButton.value = false;
   userEmail.value = selectStudent.email;
   updateCardStateCount.value = updateCardStateCount.value + 1;
 
@@ -441,12 +567,16 @@ const updateCardState = (isModal) => {
 
 const addNewTask = (title, id, fullColumn) => {
   cardState.value = title;
+  cardType.value = "";
+  cardTitle.value = "";
+  cardDescription.value = "";
   showModal.value = true;
 };
 
 const closeModal = () => {
   showModal.value = false;
   isShowCardDetails.value = false;
+  isShowSaveButton.value = false;
 };
 </script>
 
@@ -458,6 +588,9 @@ const closeModal = () => {
 }
 .columnHeight {
   max-height: calc(100% + 115px);
+}
+.dragArea {
+  min-width: 240px;
 }
 .progressBody {
   padding: 16px;

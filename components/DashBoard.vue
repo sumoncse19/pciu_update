@@ -241,7 +241,7 @@
               />
             </g>
           </svg>
-          <NuxtLink to="/document-write" class="text-base leading-4"
+          <NuxtLink to="/documentWrite" class="text-base leading-4"
             >Document Write</NuxtLink
           >
         </button>
